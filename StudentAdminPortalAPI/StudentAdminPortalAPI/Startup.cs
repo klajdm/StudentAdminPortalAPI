@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
@@ -45,6 +47,8 @@ namespace StudentAdminPortalAPI
             options.UseSqlServer(Configuration.GetConnectionString("StudentAdminPortalDb")));
 
             services.AddScoped<IStudentRepository, SqlStudentRepository>();
+            services.AddScoped<IImageRepository, ImageStorageLocalRepository>();
+
 
             services.AddSwaggerGen(c =>
             {
@@ -65,6 +69,12 @@ namespace StudentAdminPortalAPI
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Resources")),
+                RequestPath = "/Resources"
+            });
 
             app.UseRouting();
 
