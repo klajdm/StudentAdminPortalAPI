@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using StudentAdminPortalAPI.DomainModels;
+using StudentAdminPortalAPI.Profiles.AfterMaps;
 using Models = StudentAdminPortalAPI.Models;
 
 namespace StudentAdminPortalAPI.Profiles
@@ -16,6 +17,12 @@ namespace StudentAdminPortalAPI.Profiles
 
             CreateMap<Models.Address, Address>()
                .ReverseMap();
+
+            CreateMap<UpdateStudentRequest, Models.Student>()
+                .AfterMap<UpdateStudentRequestAfterMap>();
+
+            CreateMap<AddStudentRequest, Models.Student>()
+                .AfterMap<AddStudentRequestAfterMap>();
         }
     }
 }
