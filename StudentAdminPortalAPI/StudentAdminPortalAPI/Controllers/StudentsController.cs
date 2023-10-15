@@ -94,21 +94,37 @@ namespace StudentAdminPortalAPI.Controllers
         [Route("[controller]/{studentId:guid}/upload-image")]
         public async Task<IActionResult> UploadImage([FromRoute] Guid studentId, IFormFile profileImage)
         {
-            // Check if student exist
-            if (await studentRepository.Exists(studentId))
+            var validExtentions = new List<string>
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
-                // Upload the Image to local storage
-                var fileImagePath = await imageRepository.Upload(profileImage, fileName);
+                "jpeg",
+                "png",
+                "gif",
+                "jpg"
+            };
 
-                // Update profile image path in database
-
-               if  (await studentRepository.UpdateProfileImage(studentId, fileImagePath))
+            if (profileImage == null && profileImage.Length > 0)
+            {
+                var extention = Path.GetExtension(profileImage.FileName);
+                if (validExtentions.Contains(extention))
                 {
-                    return Ok(fileImagePath);
-                }
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error uplading image");
 
+                    // Check if student exist
+                    if (await studentRepository.Exists(studentId))
+                    {
+                        var fileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
+                        // Upload the Image to local storage
+                        var fileImagePath = await imageRepository.Upload(profileImage, fileName);
+
+                        // Update profile image path in database
+
+                        if (await studentRepository.UpdateProfileImage(studentId, fileImagePath))
+                        {
+                            return Ok(fileImagePath);
+                        }
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Error uplading image");
+                    }
+                }
+                return BadRequest("Format not supported!");
             }
 
             return NotFound();
